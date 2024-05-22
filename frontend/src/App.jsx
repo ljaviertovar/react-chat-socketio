@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import io from 'socket.io-client'
 
 // const socket = io('http://localhost:4000')
@@ -7,14 +7,29 @@ const socket = io('/')
 
 function App() {
 	const [message, setMessage] = useState(null)
+	const [messages, setMessages] = useState([])
 
 	const handleSubmit = e => {
 		e.preventDefault()
 
-		console.log('input:', message)
-		// socket.emit('chat message', input.value)
-		// input.value = ''
-		// return false
+		socket.emit('chat message', message)
+
+		setMessages([...messages, message])
+		setMessage('')
+	}
+
+	useEffect(() => {
+		socket.on('chat message', msg => {
+			reciveMessage(msg)
+		})
+
+		return () => {
+			socket.off('chat message')
+		}
+	}, [messages])
+
+	const reciveMessage = msg => {
+		setMessages(prev => [...prev, msg])
 	}
 
 	return (
@@ -34,6 +49,14 @@ function App() {
 				/>
 				<button>Send</button>
 			</form>
+
+			<div>
+				<ul id='messages'>
+					{messages.map((msg, i) => (
+						<li key={i}>{msg}</li>
+					))}
+				</ul>
+			</div>
 		</div>
 	)
 }
