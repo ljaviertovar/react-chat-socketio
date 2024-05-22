@@ -19,7 +19,10 @@ io.on('connection', (socket) => {
   })
 
   socket.on('chat message', (msg) => {
-    socket.broadcast.emit('chat message', msg)
+    socket.broadcast.emit('chat message', {
+      body: msg,
+      id: socket.id.slice(6)
+    })
   })
 })
 
